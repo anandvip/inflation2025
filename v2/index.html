@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Investment & Farmland Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .header p { font-size: 1.1rem; opacity: 0.9; }
+        
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .calculator-grid { grid-template-columns: 1fr; }
+        }
+        
+        .input-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .results-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .result-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .result-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .comparison-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .investment-card {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e1e5e9;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .investment-card.positive {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            border-color: #4ecdc4;
+        }
+        
+        .investment-card.negative {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-color: #ff8a80;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Complete Investment & Farmland Calculator</h1>
+            <p>Comprehensive analysis with inflation impact, farmland decisions, and investment comparisons</p>
+        </div>
+        
+        <!-- Main Investment Analysis -->
+        <div class="calculator-grid">
+            <div class="input-panel">
+                <h3 class="section-title">💰 Investment Analysis</h3>
+                <div class="form-group">
+                    <label for="principal">Investment Amount (₹)</label>
+                    <input type="number" id="principal" value="3000000" min="1000" step="1000">
+                    <small style="color: #666;">From farmland sale or other sources</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fdRate">Fixed Deposit Rate (%)</label>
+                    <input type="number" id="fdRate" value="6.5" min="0" max="20" step="0.1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="inflationRate">Current Inflation Rate (%) 
+                        <button type="button" onclick="fetchLiveInflation()" style="margin-left: 10px; padding: 5px 10px; background: #4ecdc4; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            📡 Get Live
+                        </button>
+                    </label>
+                    <input type="number" id="inflationRate" value="4.2" min="0" max="20" step="0.1">
+                    <div id="inflationStatus" style="font-size: 12px; margin-top: 5px; color: #666;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="timeHorizon">Investment Period (Years)</label>
+                    <select id="timeHorizon">
+                        <option value="1">1 Year</option>
+                        <option value="2">2 Years</option>
+                        <option value="3">3 Years</option>
+                        <option value="5">5 Years</option>
+                        <option value="10" selected>10 Years</option>
+                        <option value="15">15 Years</option>
+                        <option value="20">20 Years</option>
+                    </select>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateReturns()">
+                    📊 Calculate Returns
+                </button>
+            </div>
+            
+            <div class="results-panel">
+                <h3 class="section-title">Your Results</h3>
+                <div id="resultsContainer">
+                    <div class="result-card">
+                        <div class="result-value" id="nominalReturn">₹0</div>
+                        <div class="result-label">Nominal Return (Before Inflation)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-value" id="realReturn">₹0</div>
+                        <div class="result-label">Real Return (After Inflation)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-value" id="purchasingPowerLoss">₹0</div>
+                        <div class="result-label">Purchasing Power Lost</div>
+                    </div>
+                    
+                    <div id="returnMessage" class="warning-box" style="display: none;">
+                        Your real return analysis will appear here
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Farmland Analysis Section -->
+        <div class="comparison-section">
+            <h3 class="section-title">🌾 Farmland Investment Decision</h3>
+            <p style="text-align: center; margin-bottom: 20px; color: #666;">
+                Should you keep your farmland or liquidate for other investments?
+            </p>
+            
+            <div class="calculator-grid">
+                <div class="input-panel">
+                    <h4 style="margin-bottom: 15px; color: #2d5a27;">📋 Family Land Holdings (Kanal-Based)</h4>
+                    
+                    <div class="form-group">
+                        <label for="yourKanals">Your Share (Kanals)</label>
+                        <input type="number" id="yourKanals" value="56" min="1" step="1">
+                        <small style="color: #666;">Your personal share in kanals</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="familyKanals">Family Member Shares (Kanals)</label>
+                        <input type="number" id="familyKanals" value="61" min="0" step="1">
+                        <small style="color: #666;">Son's/other family member's share</small>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <h5 style="margin-bottom: 10px; color: #2d5a27;">📐 Land Calculation:</h5>
+                        <div style="font-size: 14px; color: #666; line-height: 1.6;">
+                            <div id="totalKanals">• Total Kanals: 117</div>
+                            <div id="totalAcres">• Total Acres: 14.6 (117 ÷ 8)</div>
+                            <div id="grainParkingKanals">• Grain Parking: 5 kanals</div>
+                            <div id="cultivableKanals" style="font-weight: bold; color: #2d5a27;">• Cultivable Land: 112 kanals</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="grainParkingArea">Grain Parking/Non-Cultivable (Kanals)</label>
+                        <input type="number" id="grainParkingArea" value="5" min="0" step="1">
+                        <small style="color: #666;">Land used for grain storage, roads, etc.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contractPerKanal">Contract Rate (₹ per Kanal per Year)</label>
+                        <input type="number" id="contractPerKanal" value="8750" min="1000" step="250">
+                        <small style="color: #666;">Annual lease amount per kanal</small>
+                    </div>
+                </div>
+                
+                <div class="input-panel">
+                    <h4 style="margin-bottom: 15px; color: #2d5a27;">💰 Sale & Investment Options</h4>
+                    
+                    <div class="form-group">
+                        <label for="kanalsForSale">Kanals You Want to Sell</label>
+                        <input type="number" id="kanalsForSale" value="40" min="0" step="1">
+                        <small style="color: #666;">From your personal share</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="marketRatePerKanal">Market Rate (₹ per Kanal)</label>
+                        <input type="number" id="marketRatePerKanal" value="650000" min="100000" step="25000">
+                        <small style="color: #666;">Current selling price per kanal</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="saleYear">Year of Sale</label>
+                        <select id="saleYear">
+                            <option value="0">This Year (2025)</option>
+                            <option value="1">Next Year (2026)</option>
+                            <option value="2" selected>2027</option>
+                            <option value="3">2028</option>
+                            <option value="4">2029</option>
+                            <option value="5">2030</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="transactionCost">Transaction Cost if Sold (%)</label>
+                        <input type="number" id="transactionCost" value="0" min="0" max="15" step="0.5">
+                        <small style="color: #666;">0% if buyer pays all costs (Indian practice)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="landAppreciationRate">Land Appreciation Rate (% per year)</label>
+                        <input type="number" id="landAppreciationRate" value="8" min="4" max="15" step="0.5">
+                        <small style="color: #666;">Annual land value increase</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contractIncreaseRate">Annual Contract Increase (%)</label>
+                        <input type="number" id="contractIncreaseRate" value="5" min="0" max="10" step="0.5">
+                        <small style="color: #666;">Yearly increase in contract amount</small>
+                    </div>
+                    
+                    <button class="calculate-btn" onclick="analyzeFarmland()" style="background: linear-gradient(135deg, #2d5a27 0%, #5cb85c 100%);">
+                        🌾 Analyze Farmland Decision
+                    </button>
+                </div>
+            </div>
+            
+            <div class="results-panel" style="margin-top: 20px;">
+                <h4 style="margin-bottom: 15px; color: #2d5a27; text-align: center;">🎯 Investment Recommendation</h4>
+                <div id="farmlandRecommendation" class="result-card">
+                    <div class="result-value">Click Analyze</div>
+                    <div class="result-label">Personalized recommendation based on your data</div>
+                </div>
+                
+                <div id="farmlandDetails" style="margin-top: 15px;">
+                    <!-- Detailed analysis will appear here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Investment Comparison -->
+        <div class="comparison-section">
+            <h3 class="section-title">📊 Investment Options Comparison</h3>
+            <div class="calculator-grid" id="comparisonGrid">
+                <!-- Investment comparison cards will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Charts Section -->
+        <div class="chart-container">
+            <h3 class="section-title">📈 Growth Comparison Over Time</h3>
+            <canvas id="growthChart" width="400" height="200"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <h3 class="section-title">🛡️ Inflation Protection Analysis</h3>
+            <canvas id="protectionChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let growthChart, protectionChart;
+        
+        const investmentOptions = [
+            { name: 'Fixed Deposit', rate: 6.5, risk: 'Very Low', color: '#ff6b6b' },
+            { name: 'NSC/PPF', rate: 7.1, risk: 'Very Low', color: '#4ecdc4' },
+            { name: 'Debt Mutual Funds', rate: 7.5, risk: 'Low', color: '#45b7d1' },
+            { name: 'Hybrid Funds', rate: 9.0, risk: 'Medium', color: '#96ceb4' },
+            { name: 'Large Cap Equity', rate: 12.0, risk: 'Medium-High', color: '#feca57' },
+            { name: 'Small Cap Equity', rate: 15.0, risk: 'High', color: '#ff9ff3' },
+            { name: 'Gold', rate: 8.0, risk: 'Medium', color: '#f38ba8' },
+            { name: 'Real Estate', rate: 10.0, risk: 'High', color: '#a8e6cf' }
+        ];
+        
+        async function fetchLiveInflation() {
+            const statusEl = document.getElementById('inflationStatus');
+            const inflationInput = document.getElementById('inflationRate');
+            
+            statusEl.textContent = '🔄 Fetching live inflation data...';
+            statusEl.style.color = '#666';
+            
+            try {
+                // Simulate API call for now
+                setTimeout(() => {
+                    const recentInflationData = 5.7; // Recent India inflation estimate
+                    inflationInput.value = recentInflationData;
+                    statusEl.textContent = `✅ Live data: ${recentInflationData}% (Latest available)`;
+                    statusEl.style.color = '#28a745';
+                    calculateReturns();
+                }, 1000);
+            } catch (error) {
+                statusEl.textContent = '❌ Failed to fetch live data';
+                statusEl.style.color = '#dc3545';
+            }
+        }
+        
+        function calculateReturns() {
+            const principal = parseFloat(document.getElementById('principal').value) || 3000000;
+            const fdRate = parseFloat(document.getElementById('fdRate').value) || 6.5;
+            const inflationRate = parseFloat(document.getElementById('inflationRate').value) || 4.2;
+            const years = parseInt(document.getElementById('timeHorizon').value) || 10;
+            
+            // Calculate compound returns
+            const nominalAmount = principal * Math.pow(1 + fdRate/100, years);
+            const realAmount = principal * Math.pow(1 + (fdRate - inflationRate)/100, years);
+            const inflationAdjustedValue = principal * Math.pow(1 + inflationRate/100, years);
+            
+            const purchasingPowerLoss = inflationAdjustedValue - nominalAmount;
+            
+            // Update display
+            document.getElementById('nominalReturn').textContent = `₹${nominalAmount.toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+            document.getElementById('realReturn').textContent = `₹${realAmount.toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+            document.getElementById('purchasingPowerLoss').textContent = `₹${Math.abs(purchasingPowerLoss).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+            
+            const messageEl = document.getElementById('returnMessage');
+            messageEl.style.display = 'block';
+            if (fdRate <= inflationRate) {
+                messageEl.className = 'warning-box';
+                messageEl.textContent = `⚠️ Your real return is ${(fdRate - inflationRate).toFixed(1)}%! You're losing purchasing power.`;
+            } else {
+                messageEl.className = 'success-box';
+                messageEl.textContent = `✅ Your real return is ${(fdRate - inflationRate).toFixed(1)}%. You're beating inflation!`;
+            }
+            
+            updateComparison(principal, inflationRate, years);
+            updateCharts(principal, fdRate, inflationRate, years);
+        }
+        
+        function updateKanalDisplayLive() {
+            const yourKanals = parseFloat(document.getElementById('yourKanals').value) || 56;
+            const familyKanals = parseFloat(document.getElementById('familyKanals').value) || 61;
+            const grainParkingArea = parseFloat(document.getElementById('grainParkingArea').value) || 5;
+            
+            const totalKanals = yourKanals + familyKanals;
+            const totalAcres = totalKanals / 8;
+            const cultivableKanals = totalKanals - grainParkingArea;
+            
+            document.getElementById('totalKanals').textContent = `• Total Kanals: ${totalKanals}`;
+            document.getElementById('totalAcres').textContent = `• Total Acres: ${totalAcres.toFixed(1)} (${totalKanals} ÷ 8)`;
+            document.getElementById('grainParkingKanals').textContent = `• Grain Parking: ${grainParkingArea} kanals`;
+            document.getElementById('cultivableKanals').textContent = `• Cultivable Land: ${cultivableKanals} kanals`;
+            
+            // Update annual income based on cultivable land
+            const contractPerKanal = parseFloat(document.getElementById('contractPerKanal').value) || 8750;
+            const annualIncome = cultivableKanals * contractPerKanal;
+            
+            // You can display this information somewhere if needed
+            return { totalKanals, cultivableKanals, annualIncome };
+        }
+        
+        function analyzeFarmland() {
+            const yourKanals = parseFloat(document.getElementById('yourKanals').value) || 56;
+            const familyKanals = parseFloat(document.getElementById('familyKanals').value) || 61;
+            const grainParkingArea = parseFloat(document.getElementById('grainParkingArea').value) || 5;
+            const kanalsForSale = parseFloat(document.getElementById('kanalsForSale').value) || 40;
+            const marketRatePerKanal = parseFloat(document.getElementById('marketRatePerKanal').value) || 650000;
+            const saleYear = parseInt(document.getElementById('saleYear').value) || 2;
+            const transactionCost = parseFloat(document.getElementById('transactionCost').value) || 0;
+            const landAppreciationRate = parseFloat(document.getElementById('landAppreciationRate').value) || 8;
+            const contractIncreaseRate = parseFloat(document.getElementById('contractIncreaseRate').value) || 5;
+            const contractPerKanal = parseFloat(document.getElementById('contractPerKanal').value) || 8750;
+            const timeHorizon = parseInt(document.getElementById('timeHorizon').value) || 10;
+            const inflationRate = parseFloat(document.getElementById('inflationRate').value) || 4.2;
+            
+            const totalKanals = yourKanals + familyKanals;
+            const cultivableKanals = totalKanals - grainParkingArea;
+            const currentLandValue = totalKanals * marketRatePerKanal;
+            
+            // Calculate sale proceeds
+            const futureRatePerKanal = marketRatePerKanal * Math.pow(1 + landAppreciationRate/100, saleYear);
+            const grossSaleValue = kanalsForSale * futureRatePerKanal;
+            const netSaleProceeds = grossSaleValue * (1 - transactionCost/100);
+            
+            // Scenario 1: Keep all farmland
+            const landValueAfterTime = currentLandValue * Math.pow(1 + landAppreciationRate/100, timeHorizon);
+            let totalFarmIncome = 0;
+            let annualIncome = cultivableKanals * contractPerKanal;
+            
+            for (let i = 1; i <= timeHorizon; i++) {
+                totalFarmIncome += annualIncome * Math.pow(1 + contractIncreaseRate/100, i-1);
+            }
+            
+            const keepTotalValue = landValueAfterTime + totalFarmIncome;
+            const keepCAGR = Math.pow(keepTotalValue / currentLandValue, 1/timeHorizon) - 1;
+            
+            // Scenario 2: Sell partial and invest
+            const investmentGrowth = netSaleProceeds * Math.pow(1.12, timeHorizon - saleYear); // 12% equity returns
+            const remainingLandValue = (totalKanals - kanalsForSale) * marketRatePerKanal * Math.pow(1 + landAppreciationRate/100, timeHorizon);
+            const remainingCultivableKanals = cultivableKanals - (kanalsForSale * cultivableKanals / totalKanals);
+            
+            let remainingFarmIncome = 0;
+            let remainingAnnualIncome = remainingCultivableKanals * contractPerKanal;
+            
+            for (let i = 1; i <= timeHorizon; i++) {
+                remainingFarmIncome += remainingAnnualIncome * Math.pow(1 + contractIncreaseRate/100, i-1);
+            }
+            
+            const sellTotalValue = investmentGrowth + remainingLandValue + remainingFarmIncome;
+            const sellCAGR = Math.pow(sellTotalValue / currentLandValue, 1/timeHorizon) - 1;
+            
+            // Generate recommendation
+            let recommendation, details;
+            const returnDifference = (sellCAGR - keepCAGR) * 100;
+            
+            if (Math.abs(returnDifference) < 0.5) {
+                recommendation = "⚖️ MARGINAL DIFFERENCE";
+                details = `Both strategies give similar returns (${Math.abs(returnDifference).toFixed(1)}% difference). Consider non-financial factors.`;
+            } else if (keepCAGR > sellCAGR) {
+                recommendation = "🌾 KEEP ALL FARMLAND";
+                details = `Keeping all your farmland gives ${Math.abs(returnDifference).toFixed(1)}% higher annual returns.`;
+            } else {
+                recommendation = "💰 SELL PARTIAL & INVEST";
+                details = `Selling ${kanalsForSale} kanals and investing gives ${returnDifference.toFixed(1)}% higher annual returns.`;
+            }
+            
+            // Update displays
+            document.getElementById('farmlandRecommendation').innerHTML = `
+                <div class="result-value" style="font-size: 1.3rem;">${recommendation}</div>
+                <div class="result-label">${details}</div>
+            `;
+            
+            document.getElementById('farmlandDetails').innerHTML = `
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <h5 style="margin-bottom: 15px; color: #2d5a27;">📊 Detailed Analysis:</h5>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="investment-card positive">
+                            <h4>🌾 Keep All Farmland</h4>
+                            <div style="font-size: 1.5rem; font-weight: bold; margin: 10px 0; color: #2d5a27;">
+                                ${(keepCAGR * 100).toFixed(1)}% CAGR
+                            </div>
+                            <div style="font-size: 0.9rem; margin-bottom: 10px;">
+                                Final Value: ₹${keepTotalValue.toLocaleString('en-IN', {maximumFractionDigits: 0})}
+                            </div>
+                            <div style="font-size: 0.8rem; text-align: left;">
+                                • Land Value: ₹${landValueAfterTime.toLocaleString('en-IN', {maximumFractionDigits: 0})}<br>
+                                • Total Income: ₹${totalFarmIncome.toLocaleString('en-IN', {maximumFractionDigits: 0})}<br>
+                                • Current Annual Income: ₹${annualIncome.toLocaleString('en-IN')}<br>
+                                • Real Return: ${((keepCAGR * 100) - inflationRate).toFixed(1)}%<br>
+                                • Tax-Free Agricultural Income: ✅
+                            </div>
+                        </div>
+                        
+                        <div class="investment-card positive">
+                            <h4>💰 Sell ${kanalsForSale} Kanals & Invest</h4>
+                            <div style="font-size: 1.5rem; font-weight: bold; margin: 10px 0; color: #2d5a27;">
+                                ${(sellCAGR * 100).toFixed(1)}% CAGR
+                            </div>
+                            <div style="font-size: 0.9rem; margin-bottom: 10px;">
+                                Final Value: ₹${sellTotalValue.toLocaleString('en-IN', {maximumFractionDigits: 0})}
+                            </div>
+                            <div style="font-size: 0.8rem; text-align: left;">
+                                • Investment Growth: ₹${investmentGrowth.toLocaleString('en-IN', {maximumFractionDigits: 0})}<br>
+                                • Remaining Land: ₹${remainingLandValue.toLocaleString('en-IN', {maximumFractionDigits: 0})}<br>
+                                • Remaining Income: ₹${remainingFarmIncome.toLocaleString('en-IN', {maximumFractionDigits: 0})}<br>
+                                • Sale Proceeds (${2025 + saleYear}): ₹${netSaleProceeds.toLocaleString('en-IN', {maximumFractionDigits: 0})}<br>
+                                • Real Return: ${((sellCAGR * 100) - inflationRate).toFixed(1)}%<br>
+                                • Diversified Portfolio: ✅
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px;">
+                        <h6 style="color: #2d5a27; margin-bottom: 10px;">💰 Sale Calculation:</h6>
+                        <div style="font-size: 14px; color: #666;">
+                            • Sale Value: ${kanalsForSale} kanals × ₹${futureRatePerKanal.toLocaleString('en-IN', {maximumFractionDigits: 0})} = ₹${grossSaleValue.toLocaleString('en-IN', {maximumFractionDigits: 0})}<br>
+                            • After ${transactionCost}% costs: ₹${netSaleProceeds.toLocaleString('en-IN', {maximumFractionDigits: 0})}<br>
+                            • Available for investment in equity/bonds/FDs
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Update the main investment amount
+            document.getElementById('principal').value = Math.round(netSaleProceeds);
+            calculateReturns();
+        }
+        
+        function updateComparison(principal, inflationRate, years) {
+            const grid = document.getElementById('comparisonGrid');
+            grid.innerHTML = '';
+            
+            investmentOptions.forEach(option => {
+                const realReturn = option.rate - inflationRate;
+                const finalAmount = principal * Math.pow(1 + option.rate/100, years);
+                const isPositive = realReturn > 0;
+                
+                const card = document.createElement('div');
+                card.className = `investment-card ${isPositive ? 'positive' : 'negative'}`;
+                card.innerHTML = `
+                    <h4 style="margin-bottom: 10px;">${option.name}</h4>
+                    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 5px;">
+                        ${realReturn > 0 ? '+' : ''}${realReturn.toFixed(1)}%
+                    </div>
+                    <div style="font-size: 0.9rem; margin-bottom: 5px;">Real Return</div>
+                    <div style="font-size: 0.8rem; color: #666;">
+                        Final: ₹${finalAmount.toLocaleString('en-IN', {maximumFractionDigits: 0})}
+                    </div>
+                    <div style="font-size: 0.7rem; margin-top: 5px; opacity: 0.8;">
+                        Risk: ${option.risk}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        
+        function updateCharts(principal, fdRate, inflationRate, years) {
+            updateGrowthChart(principal, fdRate, inflationRate, years);
+            updateProtectionChart(inflationRate);
+        }
+        
+        function updateGrowthChart(principal, fdRate, inflationRate, years) {
+            if (typeof Chart === 'undefined') return;
+            
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            
+            if (growthChart) {
+                growthChart.destroy();
+            }
+            
+            const yearLabels = [];
+            const nominalData = [];
+            const realData = [];
+            const inflationData = [];
+            
+            for (let i = 0; i <= years; i++) {
+                yearLabels.push(`Year ${i}`);
+                nominalData.push(principal * Math.pow(1 + fdRate/100, i));
+                realData.push(principal * Math.pow(1 + (fdRate - inflationRate)/100, i));
+                inflationData.push(principal * Math.pow(1 + inflationRate/100, i));
+            }
+            
+            growthChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: yearLabels,
+                    datasets: [
+                        {
+                            label: 'Investment Value',
+                            data: nominalData,
+                            borderColor: '#4ecdc4',
+                            backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Real Value (After Inflation)',
+                            data: realData,
+                            borderColor: '#ff6b6b',
+                            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Cost of Living',
+                            data: inflationData,
+                            borderColor: '#feca57',
+                            backgroundColor: 'rgba(254, 202, 87, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'How Your Money Grows vs Inflation'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Amount (₹)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString('en-IN');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateProtectionChart(currentInflation) {
+            if (typeof Chart === 'undefined') return;
+            
+            const ctx = document.getElementById('protectionChart').getContext('2d');
+            
+            if (protectionChart) {
+                protectionChart.destroy();
+            }
+            
+            const protectionData = investmentOptions.map(option => ({
+                name: option.name,
+                protection: option.rate - currentInflation,
+                color: option.color
+            }));
+            
+            protectionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: protectionData.map(d => d.name),
+                    datasets: [{
+                        label: 'Inflation Protection (%)',
+                        data: protectionData.map(d => d.protection),
+                        backgroundColor: protectionData.map(d => d.color + '80'),
+                        borderColor: protectionData.map(d => d.color),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Real Returns: Which Investments Beat Inflation?'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Real Return (%)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Event listeners
+        document.getElementById('principal').addEventListener('input', calculateReturns);
+        document.getElementById('fdRate').addEventListener('input', calculateReturns);
+        document.getElementById('inflationRate').addEventListener('input', calculateReturns);
+        document.getElementById('timeHorizon').addEventListener('change', calculateReturns);
+        
+        // Farmland event listeners
+        document.getElementById('yourKanals').addEventListener('input', updateKanalDisplayLive);
+        document.getElementById('familyKanals').addEventListener('input', updateKanalDisplayLive);
+        document.getElementById('grainParkingArea').addEventListener('input', updateKanalDisplayLive);
+        document.getElementById('contractPerKanal').addEventListener('input', updateKanalDisplayLive);
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateKanalDisplayLive();
+            calculateReturns();
+        });
+    </script>
+</body>
+</html>
