@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agriculture Land Price Growth Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f4f4f4; color: #333; }
+    h1 { text-align: center; margin-bottom: 20px; }
+    form { display: grid; gap: 10px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    label { display: flex; justify-content: space-between; font-weight: bold; }
+    input[type=month], input[type=number] { width: 170px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 10px; font-size: 16px; border: none; border-radius: 4px; cursor: pointer; }
+    #calculate { background: #28a745; color: #fff; }
+    #calculate:hover { background: #218838; }
+    .result, .future-section, .info-section { margin-top: 20px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .future-section { display: none; }
+    .future-section label { margin-bottom: 10px; display: flex; justify-content: space-between; }
+    #futureDesc { font-size: 14px; color: #444; margin-bottom: 10px; }
+    #estimateFuture { background: #007bff; color: #fff; }
+    #estimateFuture:hover { background: #0069d9; }
+    .disclaimer { font-size: 10px; color: #666; margin-top: 20px; text-align: center; }
+    .info-section strong { display: block; margin-bottom: 5px; }
+    .info-section p, .info-section ul { margin: 5px 0; font-size: 14px; }
+    .info-section ul { padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Agriculture Land Price Growth Calculator</h1>
+  <form id="calcForm">
+    <label>Historic Year: <input type="month" id="historyYear" required></label>
+    <label>Historic Price: <input type="number" id="historyPrice" min="0" required></label>
+    <label>Current Year: <input type="month" id="currentYear" required></label>
+    <label>Current Price: <input type="number" id="currentPrice" min="0" required></label>
+    <button type="button" id="calculate">Calculate Growth</button>
+  </form>
+
+  <div id="result" class="result" style="display:none;"></div>
+  <div id="futureSection" class="future-section">
+    <label>Future Years (1-10): <input type="number" id="futureYears" min="1" max="10" value="1"></label>
+    <div id="futureDesc"></div>
+    <button type="button" id="estimateFuture">Estimate Future Growth</button>
+    <div id="futureResult" style="margin-top:15px;"></div>
+    <div class="disclaimer">
+      At the above growth rate, future prices will most likely look like this.<br>
+      <em>Disclaimer:</em> This is an approximate estimate for educational and research purposes only.<br>
+      Prepared by Vipul Anand.
+    </div>
+  </div>
+
+  <div class="info-section">
+    <strong>Abbreviations Used:</strong>
+    <p><strong>CAGR</strong>: Compound Annual Growth Rate</p>
+    <strong>Formula for CAGR:</strong>
+    <p>
+      <code>CAGR = ( (Current Price / Historic Price)^(1 / Years Gap) - 1 ) × 100</code>
+    </p>
+    <p>Where:</p>
+    <ul>
+      <li><strong>Current Price</strong> = Current land price input (₹)</li>
+      <li><strong>Historic Price</strong> = Historic land price input (₹)</li>
+      <li><strong>Years Gap</strong> = Number of years between historic and current year</li>
+    </ul>
+  </div>
+
+  <script>
+    // Set selectable range for year pickers
+    document.querySelectorAll('input[type="month"]').forEach(function(input) {
+      const currentYear = new Date().getFullYear();
+      input.setAttribute('min', '1900-01');
+      input.setAttribute('max', (currentYear + 10) + '-12');
+    });
+
+    document.getElementById('calculate').addEventListener('click', function() {
+      // Parse year values from month inputs
+      const hy = +document.getElementById('historyYear').value.split('-')[0];
+      const hp = +document.getElementById('historyPrice').value;
+      const cy = +document.getElementById('currentYear').value.split('-')[0];
+      const cp = +document.getElementById('currentPrice').value;
+
+      if (cy <= hy) { alert('Current year must be greater than historic year'); return; }
+      if (hp <= 0 || cp <= 0) { alert('Prices must be positive'); return; }
+
+      const years = cy - hy;
+      const totalIncrease = cp - hp;
+      const avgIncrease = totalIncrease / years;
+      const cagr = (Math.pow(cp / hp, 1 / years) - 1) * 100;
+      const totalPercent = (totalIncrease / hp) * 100;
+
+      const resDiv = document.getElementById('result');
+      resDiv.style.display = 'block';
+      resDiv.innerHTML = `
+        <p>Years Gap: <strong>${years}</strong></p>
+        <p>Total Price Increase: <strong>${totalIncrease.toFixed(2)}</strong></p>
+        <p>Average Annual Increase: <strong>${avgIncrease.toFixed(2)}</strong></p>
+        <p>Total Percentage Increase: <strong>${totalPercent.toFixed(2)}%</strong></p>
+        <p>Average Annual Growth Rate (CAGR): <strong>${cagr.toFixed(2)}%</strong></p>
+      `;
+
+      const futureSection = document.getElementById('futureSection');
+      futureSection.style.display = 'block';
+
+      // Set description with actual rate
+      document.getElementById('futureDesc').textContent =
+        `At the above growth rate (${cagr.toFixed(2)}%), future tentative prices will most likely look like this or near this if this trend and demand continues or even if it fluctuates a little—investments will look in this range as time passes.`;
+
+      document.getElementById('estimateFuture').onclick = function() {
+        const fy = +document.getElementById('futureYears').value;
+        const futureResult = document.getElementById('futureResult');
+        futureResult.innerHTML = '';
+        for (let i = 1; i <= fy; i++) {
+          const estPrice = cp * Math.pow(1 + cagr/100, i);
+          const year = cy + i;
+          const p = document.createElement('p');
+          p.textContent = `${year}: ₹${estPrice.toFixed(2)}`;
+          futureResult.appendChild(p);
+        }
+      };
+    });
+  </script>
+</body>
+</html>
