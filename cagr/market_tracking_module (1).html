@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agriculture Land Price Growth Calculator</title>
+  <style>
+    body { font-family: 'JetBrains Mono', Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f4f4f4; color: #333; }
+    h1 { text-align: center; margin-bottom: 20px; color: #1a202c; }
+    
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      background: white;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+      margin-bottom: 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .nav-tab {
+      flex: 1;
+      padding: 15px 20px;
+      background: #e2e8f0;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      color: #4a5568;
+    }
+    
+    .nav-tab.active {
+      background: #38a169;
+      color: white;
+    }
+    
+    .nav-tab:hover:not(.active) {
+      background: #cbd5e0;
+    }
+    
+    /* Tab Content */
+    .tab-content {
+      display: none;
+      background: white;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Calculator Tab Styles */
+    .calculator-content {
+      padding: 20px;
+    }
+    
+    form, .result, .future-section, .deal-section, .future-deal-section, .info-section, details { 
+      margin-top: 20px; 
+      background: #f8f9fa; 
+      padding: 20px; 
+      border-radius: 8px; 
+      border-left: 4px solid #4299e1;
+    }
+    
+    form { display: grid; gap: 15px; border-left-color: #38a169; }
+    .result { border-left-color: #805ad5; }
+    .future-section, .deal-section, .future-deal-section { border-left-color: #ed8936; }
+    
+    label { display: flex; justify-content: space-between; font-weight: bold; align-items: center; }
+    input[type=month], input[type=number] { width: 170px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
+    
+    button { padding: 12px 20px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.3s ease; }
+    #calculate { background: #38a169; color: #fff; }
+    #calculate:hover { background: #2f855a; }
+    #estimateFuture, #calculateDeal, #estimateFutureDeal, #exportData { background: #4299e1; color: #fff; margin-right: 10px; }
+    #estimateFuture:hover, #calculateDeal:hover, #estimateFutureDeal:hover, #exportData:hover { background: #3182ce; }
+    
+    .future-section, .deal-section, .future-deal-section { display: none; }
+    details summary { font-weight: bold; cursor: pointer; color: #4a5568; }
+    details p { margin: 10px 0; }
+    
+    .disclaimer { font-size: 12px; color: #666; margin-top: 15px; text-align: center; font-style: italic; }
+    .info-section strong { display: block; margin-bottom: 8px; color: #2d3748; }
+    .info-section p, .info-section ul { margin: 8px 0; font-size: 14px; }
+    .info-section ul { padding-left: 20px; }
+    
+    /* Dashboard Tab Styles */
+    .dashboard-content {
+      padding: 0;
+      min-height: 800px;
+    }
+    
+    .dashboard-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px;
+      text-align: center;
+    }
+    
+    .dashboard-header h2 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    
+    .dashboard-header p {
+      margin: 5px 0 0 0;
+      opacity: 0.9;
+    }
+    
+    .dashboard-body {
+      padding: 25px;
+    }
+    
+    /* Import/Export Section */
+    .data-sync {
+      background: #e6fffa;
+      border: 2px solid #38a169;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    
+    .data-sync h4 {
+      margin: 0 0 10px 0;
+      color: #2f855a;
+    }
+    
+    .sync-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    .file-label {
+      background: #38a169;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    
+    .file-label:hover {
+      background: #2f855a;
+    }
+    
+    /* Market Overview Cards */
+    .market-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .market-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-top: 4px solid #4299e1;
+    }
+    
+    .card-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 5px;
+    }
+    
+    .card-label {
+      font-size: 0.9rem;
+      color: #4a5568;
+    }
+    
+    /* Transaction List */
+    .transaction-list {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .transaction-item {
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .transaction-item:last-child {
+      border-bottom: none;
+    }
+    
+    .transaction-header {
+      font-weight: 600;
+      background: #f7fafc;
+      border-radius: 4px;
+    }
+    
+    /* Modal Styles */
+    #modalOverlay { display: none; position: fixed; top: 0; left: 0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+    #modalContent { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90%; overflow-y: auto; }
+    #modalContent h2 { margin-top: 0; color: #1a202c; }
+    #modalClose { float: right; cursor: pointer; font-size: 20px; color: #4a5568; }
+    #modalClose:hover { color: #1a202c; }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      body { margin: 20px auto; padding: 15px; }
+      .nav-tabs { flex-direction: column; }
+      .sync-buttons { flex-direction: column; }
+      .transaction-item { grid-template-columns: 1fr; gap: 5px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🌾 Anand Agro Farms - Land Investment Analysis Suite</h1>
+
+  <!-- Navigation Tabs -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('calculator')">📊 CAGR Calculator</button>
+    <button class="nav-tab" onclick="switchTab('dashboard')">📈 Market Dashboard</button>
+  </div>
+
+  <!-- Calculator Tab Content -->
+  <div id="calculatorTab" class="tab-content active">
+    <div class="calculator-content">
+      
+      <form id="calcForm">
+        <div style="background: #e6fffa; padding: 15px; border-radius: 6px; border-left: 4px solid #38a169; margin-bottom: 15px;">
+          <h4 style="margin: 0 0 10px 0; color: #2f855a;">👥 Deal Participants</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <label>Buyer Name: <input type="text" id="buyerName" placeholder="Enter buyer name" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit;"></label>
+            <label>Seller Name: <input type="text" id="sellerName" placeholder="Enter seller name" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit;"></label>
+          </div>
+        </div>
+        
+        <label>Historic Year: <input type="month" id="historyYear" required></label>
+        <label>Historic Price per Acre (₹): <input type="number" id="historyPrice" min="0" required></label>
+        <label>Current Year: <input type="month" id="currentYear" required></label>
+        <label>Current Price per Acre (₹): <input type="number" id="currentPrice" min="0" required></label>
+        <button type="button" id="calculate">Calculate Growth</button>
+      </form>
+
+      <div id="result" class="result"></div>
+
+      <div id="futureSection" class="future-section">
+        <label>Future Years (1-10): <input type="number" id="futureYears" min="1" max="10" value="1"></label>
+        <div id="futureDesc"></div>
+        <button type="button" id="estimateFuture">Estimate Future Growth</button>
+        <button type="button" id="exportData">Export to Dashboard</button>
+        <div id="futureResult" style="margin-top:15px;"></div>
+        <div class="disclaimer">Disclaimer: Approximate estimate for educational/research only.</div>
+      </div>
+
+      <div id="dealSection" class="deal-section">
+        <label>Number of Kanals: <input type="number" id="numKanals" min="1" placeholder="Enter kanals"></label>
+        <button type="button" id="calculateDeal">Calculate Deal Account</button>
+        <div id="dealResult" style="margin-top:15px;"></div>
+      </div>
+
+      <div id="futureDealSection" class="future-deal-section">
+        <label>Future Years (1-10): <input type="number" id="futureDealYears" min="1" max="10" value="1"></label>
+        <div id="futureDealDesc"></div>
+        <button type="button" id="estimateFutureDeal">Estimate Future Prices on Deal</button>
+        <div id="futureDealResult" style="margin-top:15px;"></div>
+        <div class="disclaimer">Disclaimer: Approximate estimate for educational/research only.</div>
+      </div>
+
+      <div class="info-section">
+        <strong>Abbreviations Used:</strong>
+        <p><strong>CAGR</strong>: Compound Annual Growth Rate</p>
+        <strong>Formula for CAGR:</strong>
+        <p><code>CAGR = ((Current Price per Acre / Historic Price per Acre)^(1 / Years Gap) - 1) × 100</code></p>
+        <p>Where:</p>
+        <ul>
+          <li><strong>Current Price per Acre</strong>: Current land price per acre (₹)</li>
+          <li><strong>Historic Price per Acre</strong>: Historic land price per acre (₹)</li>
+          <li><strong>Years Gap</strong>: Number of years between historic and current year</li>
+        </ul>
+      </div>
+
+      <details id="profitDetails" style="display: none;">
+        <summary id="profitSummary">जमीन खरीद सौदे में मुनाफा विश्लेषण</summary>
+        <div id="detailsProfit">
+          <p id="pIn">निवेश पर CAGR <strong id="pCAGR">0.00%</strong> से 3 वर्षों में अनुमानित मूल्य: ₹<strong id="pFuture">0.00</strong> करोड़।</p>
+          <p id="pFD">बैंक FD (7.5% qtr) पर अनुमानित राशि: ₹<strong id="pFDVal">0.00</strong> करोड़।</p>
+          <p id="pProfit"><span id="buyerProfitText">खरीदार का मुनाफा</span>: ₹<strong id="pProfitVal">0.00</strong> करोड़; <span id="sellerProfitText">विक्रेता लाभ</span>: ₹<strong id="pSellerVal">0.00</strong> करोड़।</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- Dashboard Tab Content -->
+  <div id="dashboardTab" class="tab-content">
+    <div class="dashboard-content">
+      <div class="dashboard-header">
+        <h2>📈 Market Tracking Dashboard</h2>
+        <p>Professional Market Analysis & Transaction Monitoring</p>
+      </div>
+      
+      <div class="dashboard-body">
+        <!-- Data Sync Section -->
+        <div class="data-sync">
+          <h4>🔄 Data Synchronization</h4>
+          <div class="sync-buttons">
+            <button onclick="syncFromCalculator()" class="file-label">Sync from Calculator</button>
+            <label for="importFile" class="file-label">Import Data</label>
+            <input type="file" id="importFile" class="file-input" accept=".json" onchange="importData(event)">
+            <button onclick="exportDashboardData()" class="file-label">Export Dashboard</button>
+          </div>
+        </div>
+
+        <!-- Market Overview -->
+        <div class="market-cards">
+          <div class="market-card">
+            <div class="card-value" id="dashCurrentPrice">₹65.0L</div>
+            <div class="card-label">Current Market Rate</div>
+          </div>
+          <div class="market-card">
+            <div class="card-value" id="dashCAGR">16.34%</div>
+            <div class="card-label">Historical CAGR</div>
+          </div>
+          <div class="market-card">
+            <div class="card-value" id="dashTransactions">3</div>
+            <div class="card-label">Total Transactions</div>
+          </div>
+          <div class="market-card">
+            <div class="card-value" id="dashRange">₹60-70L</div>
+            <div class="card-label">Price Range</div>
+          </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="transaction-list">
+          <h3 style="margin-top: 0;">📋 Transaction History</h3>
+          <div class="transaction-item transaction-header">
+            <div><strong>Date</strong></div>
+            <div><strong>Price/Acre</strong></div>
+            <div><strong>Type</strong></div>
+            <div><strong>Source</strong></div>
+          </div>
+          <div id="dashboardTransactions">
+            <!-- Transactions will be populated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Overlay -->
+  <div id="modalOverlay">
+    <div id="modalContent">
+      <span id="modalClose">&times;</span>
+      <h2>Why This Growth Rate Makes Sense</h2>
+      <p><strong>Excellent context! This CAGR is now much more realistic.</strong></p>
+      <p>Given your answers, the <strong id="modalCAGR">0.00%</strong> CAGR is actually quite justified:</p>
+      <h3>Location Advantage:</h3>
+      <ul>
+        <li><strong>Kurukshetra district</strong> is part of Haryana's golden corridor</li>
+        <li><strong>24km from Kurukshetra</strong> puts it in the development influence zone</li>
+        <li><strong>NCR proximity</strong> - Haryana has been a major beneficiary of Delhi's expansion since 2002</li>
+      </ul>
+      <h3>Premium Land Quality:</h3>
+      <ul>
+        <li><strong>Irrigated paddy-wheat belt</strong> - this is prime agricultural real estate</li>
+        <li><strong>Underground pipeline + independent tubewell</strong> - superior infrastructure commands premium</li>
+        <li><strong>Consistent water supply</strong> makes it highly valuable for agriculture and potential development</li>
+      </ul>
+      <h3>Market Dynamics (2002-2025):</h3>
+      <ul>
+        <li>Haryana experienced massive industrial growth</li>
+        <li>Infrastructure projects (highways, industrial parks)</li>
+        <li>Real estate boom in NCR extended regions</li>
+        <li>Agricultural land conversion opportunities</li>
+      </ul>
+      <h3>Your CAGR Calculation is Sound and Realistic</h3>
+      <p><strong>Professional Assessment:</strong> This is actually a conservative estimate for prime irrigated land in Haryana's development corridor. Well-documented and realistic!</p>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let cagrValue = 0;
+    let pricePerAcre = 0;
+    let buyerPays = 0;
+    let marketData = {
+      transactions: [
+        { date: '2024-12-15', price: 64.0, area: 2.5, type: 'sale', source: 'neighbor', reliability: 5, notes: 'Adjacent plot, similar irrigation' },
+        { date: '2024-11-28', price: 62.0, area: 1.0, type: 'sale', source: 'broker', reliability: 4, notes: 'Road access slightly inferior' },
+        { date: '2024-10-10', price: 65.0, area: 3.0, type: 'asking', source: 'newspaper', reliability: 3, notes: 'Prime location near highway' }
+      ]
+    };
+
+    // Modal elements
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalClose = document.getElementById('modalClose');
+    const modalCAGR = document.getElementById('modalCAGR');
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set month-picker ranges
+      document.querySelectorAll('input[type="month"]').forEach(input => {
+        const y = new Date().getFullYear();
+        input.min = '1900-01';
+        input.max = (y + 10) + '-12';
+      });
+      
+      updateDashboard();
+    });
+
+    // Tab switching
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Remove active from all nav tabs
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected tab
+      document.getElementById(tabName + 'Tab').classList.add('active');
+      event.target.classList.add('active');
+      
+      // Update dashboard when switching to it
+      if (tabName === 'dashboard') {
+        updateDashboard();
+      }
+    }
+
+    // Original calculator functions
+    document.getElementById('calculate').onclick = function() {
+      const hy = +document.getElementById('historyYear').value.split('-')[0];
+      const hp = +document.getElementById('historyPrice').value;
+      const cy = +document.getElementById('currentYear').value.split('-')[0];
+      pricePerAcre = +document.getElementById('currentPrice').value;
+      
+      if (cy <= hy || hp <= 0 || pricePerAcre <= 0) { 
+        alert('Please enter valid years and positive prices.'); 
+        return; 
+      }
+      
+      const years = cy - hy;
+      const totalIncrease = pricePerAcre - hp;
+      const avgIncrease = totalIncrease / years;
+      const totalPercent = (totalIncrease / hp) * 100;
+      cagrValue = (Math.pow(pricePerAcre / hp, 1 / years) - 1) * 100;
+      
+      document.getElementById('result').innerHTML =
+        `<p>Years Gap: <strong>${years}</strong></p>` +
+        `<p>Total Price Increase: <strong>₹${totalIncrease.toFixed(2)}</strong></p>` +
+        `<p>Average Annual Increase: <strong>₹${avgIncrease.toFixed(2)}</strong></p>` +
+        `<p>Total Percentage Increase: <strong>${totalPercent.toFixed(2)}%</strong></p>` +
+        `<p>Finally CAGR: <strong id="cagrTrigger" style="color:#007bff;cursor:pointer;">${cagrValue.toFixed(2)}%</strong></p>`;
+      
+      document.getElementById('futureSection').style.display = 'block';
+      document.getElementById('dealSection').style.display = 'block';
+      document.getElementById('futureDesc').textContent =
+        `At the above growth rate (${cagrValue.toFixed(2)}%), future prices will likely look like this.`;
+      
+      document.getElementById('cagrTrigger').onclick = function() {
+        modalCAGR.textContent = `${cagrValue.toFixed(2)}%`;
+        modalOverlay.style.display = 'flex';
+      };
+    };
+
+    // Export to dashboard
+    document.getElementById('exportData').onclick = function() {
+      if (cagrValue === 0) {
+        alert('Please calculate CAGR first!');
+        return;
+      }
+      
+      const buyerName = document.getElementById('buyerName').value.trim() || 'Unknown Buyer';
+      const sellerName = document.getElementById('sellerName').value.trim() || 'Unknown Seller';
+      
+      const newTransaction = {
+        date: document.getElementById('currentYear').value + '-01',
+        price: pricePerAcre / 100000, // Convert to lakhs
+        area: 1.0,
+        type: 'calculation',
+        source: 'cagr_tool',
+        reliability: 5,
+        notes: `CAGR: ${cagrValue.toFixed(2)}% | Historic: ₹${document.getElementById('historyPrice').value} | Buyer: ${buyerName} | Seller: ${sellerName}`
+      };
+      
+      marketData.transactions.push(newTransaction);
+      updateDashboard();
+      
+      alert(`Data exported to Dashboard for ${buyerName}! Check the Market Dashboard tab.`);
+    };
+
+    // Sync from calculator
+    function syncFromCalculator() {
+      if (cagrValue === 0) {
+        alert('Please run a calculation first in the CAGR Calculator tab!');
+        return;
+      }
+      
+      document.getElementById('exportData').click();
+    }
+
+    // Update dashboard
+    function updateDashboard() {
+      const prices = marketData.transactions.map(t => t.price);
+      const currentPrice = Math.max(...prices);
+      const totalTransactions = marketData.transactions.length;
+      const minPrice = Math.min(...prices);
+      const maxPrice = Math.max(...prices);
+      
+      document.getElementById('dashCurrentPrice').textContent = `₹${currentPrice.toFixed(1)}L`;
+      document.getElementById('dashCAGR').textContent = cagrValue > 0 ? `${cagrValue.toFixed(2)}%` : '16.34%';
+      document.getElementById('dashTransactions').textContent = totalTransactions;
+      document.getElementById('dashRange').textContent = `₹${minPrice.toFixed(0)}-${maxPrice.toFixed(0)}L`;
+      
+      // Update transaction list
+      const transactionContainer = document.getElementById('dashboardTransactions');
+      transactionContainer.innerHTML = '';
+      
+      marketData.transactions
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .forEach(transaction => {
+          const div = document.createElement('div');
+          div.className = 'transaction-item';
+          div.innerHTML = `
+            <div>${new Date(transaction.date).toLocaleDateString('en-IN')}</div>
+            <div>₹${transaction.price.toFixed(1)}L</div>
+            <div style="text-transform: capitalize;">${transaction.type}</div>
+            <div style="text-transform: capitalize;">${transaction.source}</div>
+          `;
+          transactionContainer.appendChild(div);
+        });
+    }
+
+    // Export dashboard data
+    function exportDashboardData() {
+      const data = {
+        transactions: marketData.transactions,
+        exportDate: new Date().toISOString(),
+        summary: {
+          totalTransactions: marketData.transactions.length,
+          cagr: cagrValue
+        }
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'anand_agro_market_data.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Import data
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.transactions) {
+            marketData.transactions = data.transactions;
+          } else {
+            // Handle single transaction format
+            marketData.transactions.push({
+              date: data.currentYear + '-01',
+              price: data.currentPrice / 100000,
+              area: 1.0,
+              type: 'import',
+              source: 'file',
+              reliability: 4,
+              notes: `Imported | CAGR: ${data.cagr || 'N/A'}`
+            });
+          }
+          updateDashboard();
+          alert('Data imported successfully!');
+        } catch (error) {
+          alert('Error importing data: ' + error.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Other calculator functions (unchanged)
+    document.getElementById('estimateFuture').onclick = function() {
+      const yrs = +document.getElementById('futureYears').value;
+      const ctr = document.getElementById('futureResult'); 
+      ctr.innerHTML = '';
+      const baseYear = +document.getElementById('currentYear').value.split('-')[0];
+      for (let i = 1; i <= yrs; i++) {
+        const yearLabel = baseYear + i;
+        const price = pricePerAcre * Math.pow(1 + cagrValue / 100, i);
+        ctr.innerHTML += `<p>${yearLabel}: ₹${price.toFixed(2)} per Acre</p>`;
+      }
+    };
+
+    document.getElementById('calculateDeal').onclick = function() {
+      const kanals = +document.getElementById('numKanals').value;
+      if (kanals <= 0) { alert('Enter valid number of kanals'); return; }
+      
+      const buyerName = document.getElementById('buyerName').value.trim() || 'खरीदार';
+      const sellerName = document.getElementById('sellerName').value.trim() || 'विक्रेता';
+      
+      const acres = kanals / 8; 
+      buyerPays = pricePerAcre * acres;
+      document.getElementById('dealResult').innerHTML =
+        `<p>Acres: <strong>${acres.toFixed(2)}</strong></p>` +
+        `<p>${buyerName} Pays: <strong>₹${buyerPays.toLocaleString()}</strong></p>`;
+      document.getElementById('futureDealSection').style.display = 'block';
+      document.getElementById('futureDealDesc').textContent =
+        `At the above growth rate (${cagrValue.toFixed(2)}%), future prices for ₹${buyerPays.toLocaleString()} will likely look like this.`;
+      
+      const futureVal = buyerPays * Math.pow(1 + cagrValue / 100, 3);
+      const fdVal = buyerPays * Math.pow(1 + 0.075 / 4, 12);
+      const profit = (futureVal - buyerPays) / 1e7;
+      const sellerGain = (fdVal - buyerPays) / 1e7;
+      
+      // Update profit section with dynamic names
+      document.getElementById('pCAGR').textContent = `${cagrValue.toFixed(2)}%`;
+      document.getElementById('pFuture').textContent = (futureVal / 1e7).toFixed(2);
+      document.getElementById('pFDVal').textContent = (fdVal / 1e7).toFixed(2);
+      document.getElementById('pProfitVal').textContent = profit.toFixed(2);
+      document.getElementById('pSellerVal').textContent = sellerGain.toFixed(2);
+      
+      // Update profit section with names
+      document.getElementById('profitSummary').textContent = `${buyerName} की जमीन खरीद सौदे में ${buyerName} के लिए मुनाफा`;
+      document.getElementById('buyerProfitText').textContent = `${buyerName} का मुनाफा`;
+      document.getElementById('sellerProfitText').textContent = `${sellerName} को लाभ`;
+      
+      // Show the profit details section
+      document.getElementById('profitDetails').style.display = 'block';
+    };
+
+    document.getElementById('estimateFutureDeal').onclick = function() {
+      const yrs = +document.getElementById('futureDealYears').value;
+      const ctr = document.getElementById('futureDealResult'); 
+      ctr.innerHTML = '';
+      const baseYear = +document.getElementById('currentYear').value.split('-')[0];
+      for (let i = 1; i <= yrs; i++) {
+        const yearLabel = baseYear + i;
+        const price = buyerPays * Math.pow(1 + cagrValue / 100, i);
+        ctr.innerHTML += `<p>${yearLabel}: ₹${(price / 1e7).toFixed(2)} करोड़</p>`;
+      }
+    };
+
+    // Close modal
+    modalClose.onclick = () => modalOverlay.style.display = 'none';
+    modalOverlay.onclick = e => { if (e.target === modalOverlay) modalOverlay.style.display = 'none'; };
+  </script>
+</body>
+</html>
