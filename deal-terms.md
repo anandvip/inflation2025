@@ -13,7 +13,7 @@
 4. **Price Revision:** *The price requires adjustment to finalize the deal.*
 
 5. **No Zero-Sum Situation:** *Both parties aim for a mutually beneficial outcome where neither profits at the other's expense.*\
-   *(Refer to the inflation calculator at https://anandvip.github.io/inflation/ for reality checks; use growth rate or CAGR settings to assess inflation on deposited amounts.)*
+   *(Refer to the inflation calculator at https://anandvip.github.io/inflation2025/growthrate or cagr for reality checks; use growth rate or CAGR settings to assess inflation on deposited amounts.)*
 
 6. **Handling Higher Rates:** *If higher rates are needed, Naresh can involve his network for investment, but initial documents only include Vipul and Naresh.*\
    *After the first stage, Naresh can handle his share documentation in a second stage independently.*
