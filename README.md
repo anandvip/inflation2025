@@ -5,18 +5,18 @@
 2. **Joint 4 Acres:** *This includes a tubewell connected to a pipeline and a transformer pole.*\
    *(Note: Add a Google Maps screenshot to clearly demarcate the acres under consideration for sale. Specific location details needed to generate or reference the map.)*
 
-3. **Water Share Allocation:** ***2 acres of water share*** *remains with Vipul.*\
-   *If Naresh wants control over the irrigation tubewell, he pays up to 80 lakhs per acre, and the Soni-Dera water share transfers to Vipul's tubewell.*\
-   *A pipeline from Vipul Dera to Soni Dera field is required (Vipul's son has a 2 kanal share in that).*\
-   ***Pipeline cost responsibility (Vipul, Soni, or Naresh?) is not yet agreed upon.***
+3. **Water Share Allocation:** ***2 acres of water share*** *remains with seller.*\
+   *If buyer wants control over the irrigation tubewell, he pays up to 80 lakhs per acre, and the Soni-Dera water share transfers to seller's tubewell.*\
+   *A pipeline from seller Dera to Soni Dera field is required (seller's son has a 2 kanal share in that).*\
+   ***Pipeline cost responsibility (seller, Soni, or buyer?) is not yet agreed upon.***
 
 4. **Price Revision:** *The price requires adjustment to finalize the deal.*
 
 5. **No Zero-Sum Situation:** *Both parties aim for a mutually beneficial outcome where neither profits at the other's expense.*\
    *(Refer to the inflation calculator at https://anandvip.github.io/inflation2025/growthrate or cagr for reality checks/ or try winwin to satisfy the both buyer and seller; use growth rate or CAGR settings to assess inflation on deposited amounts.)*
 
-6. **Handling Higher Rates:** *If higher rates are needed, Naresh can involve his network for investment, but initial documents only include Vipul and Naresh.*\
-   *After the first stage, Naresh can handle his share documentation in a second stage independently.*
+6. **Handling Higher Rates:** *If higher rates are needed, The buyer can involve his network for investment, but initial documents only include seller and buyer.*\
+   *After the first stage, buyer can handle his share documentation in a second stage independently.*
 
 7. **Affordability Limit:** *Past meetings indicate the buyer cannot afford 1 crore per acre.*
 
