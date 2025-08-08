@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contract Income Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: auto; }
+    h1 { text-align: center; margin-bottom: 20px; }
+    details { background: #fff; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 15px; }
+    summary { font-weight: bold; padding: 10px; cursor: pointer; }
+    .stage-content { padding: 10px; }
+    label { display: block; margin: 8px 0; }
+    input[type="number"] { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 10px 16px; border: none; background: #007BFF; color: #fff; cursor: pointer; border-radius: 4px; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .output, .summary { margin-top: 10px; padding: 10px; border-radius: 4px; }
+    .output { background: #e9ecef; }
+    .summary { background: #d1ecf1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Contract Income Calculator</h1>
+
+    <!-- Stage 1 -->
+    <details open>
+      <summary>Stage 1: % Increase (Prev → New per acre)</summary>
+      <div class="stage-content">
+        <label>Previous Rate (₹/acre):<input type="number" id="st1-prev" placeholder="10000"></label>
+        <label>New Rate (₹/acre):<input type="number" id="st1-new" placeholder="12000"></label>
+        <button id="btn-st1">Compute</button>
+        <div id="out-st1" class="output"></div>
+      </div>
+    </details>
+
+    <!-- Stage 2 -->
+    <details>
+      <summary>Stage 2: Calculate New Rate from % Increase</summary>
+      <div class="stage-content">
+        <label>Old Rate (₹/acre):<input type="number" id="st2-old" placeholder="10000"></label>
+        <label>Desired Increase (%):<input type="number" id="st2-pct" placeholder="20"></label>
+        <button id="btn-st2">Compute</button>
+        <div id="out-st2" class="output"></div>
+      </div>
+    </details>
+
+    <!-- Stage 3 -->
+    <details>
+      <summary>Stage 3: Annual & Monthly Income</summary>
+      <div class="stage-content">
+        <label><input type="radio" name="rateSel" id="sel-st1" value="st1" disabled> From Stage 1 Rate</label>
+        <label><input type="radio" name="rateSel" id="sel-st2" value="st2" disabled> From Stage 2 Rate</label>
+        <label>Land Area (kanals):<input type="number" id="st3-kanals" placeholder="16"></label>
+        <button id="btn-st3">Compute</button>
+        <div id="out-st3" class="output"></div>
+        <div id="summary-st3" class="summary"></div>
+      </div>
+    </details>
+
+    <!-- Stage 4 -->
+    <details>
+      <summary>Stage 4: Required Rate for Desired Monthly</summary>
+      <div class="stage-content">
+        <label>Desired Monthly Income (₹):<input type="number" id="st4-monthly" placeholder="20000"></label>
+        <label>Land Area (kanals):<input type="number" id="st4-kanals" placeholder="16"></label>
+        <button id="btn-st4">Compute</button>
+        <div id="out-st4" class="output"></div>
+        <div id="summary-st4" class="summary"></div>
+      </div>
+    </details>
+
+    <!-- Stage 5 -->
+    <details>
+      <summary>Stage 5: Land Sale & Investment Mix</summary>
+      <div class="stage-content">
+        <label>Total Land Under Contract (kanals):<input type="number" id="st5-total-kanals" placeholder="115"></label>
+        <label>Desired Monthly Income (₹):<input type="number" id="st5-desired" placeholder="20000"></label>
+        <label>Current Monthly Contract Income (₹):<input type="number" id="st5-current" placeholder="8000"></label>
+        <label>Annual Return Rate (%):<input type="number" id="st5-return" placeholder="12"></label>
+        <label>Market Rate (₹/acre):<input type="number" id="st5-landrate-acre" placeholder="5000000"></label>
+        <button id="btn-st5">Compute</button>
+        <div id="out-st5" class="output"></div>
+        <div id="summary-st5" class="summary"></div>
+      </div>
+    </details>
+
+    <!-- Session History -->
+    <details>
+      <summary>Session History</summary>
+      <div class="stage-content">
+        <button onclick="clearHistory()">Clear History</button>
+        <div id="logs"></div>
+      </div>
+    </details>
+
+  </div>
+
+  <script>
+    function fmt(val) {
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+    }
+
+    let rateFromSt1 = null, rateFromSt2 = null;
+
+    // Stage 1
+    document.getElementById('btn-st1').addEventListener('click', () => {
+      const p = +document.getElementById('st1-prev').value;
+      const n = +document.getElementById('st1-new').value;
+      const out = document.getElementById('out-st1');
+      if (!p || !n) return out.textContent = 'Enter valid rates';
+      const pct = ((n - p) / p * 100).toFixed(2);
+      rateFromSt1 = n;
+      out.innerHTML = `Increase ${pct}%<br>Stored ${fmt(n)}`;
+      document.getElementById('sel-st1').disabled = false;
+    });
+
+    // Stage 2
+    document.getElementById('btn-st2').addEventListener('click', () => {
+      const o = +document.getElementById('st2-old').value;
+      const pct = +document.getElementById('st2-pct').value;
+      const out = document.getElementById('out-st2');
+      if (!o || !pct) return out.textContent = 'Enter valid inputs';
+      rateFromSt2 = o * (1 + pct / 100);
+      out.innerHTML = `New ${fmt(rateFromSt2)}/acre stored`;
+      document.getElementById('sel-st2').disabled = false;
+    });
+
+    // Stage 3
+    document.getElementById('btn-st3').addEventListener('click', () => {
+      const sel = document.querySelector('input[name="rateSel"]:checked');
+      const k = +document.getElementById('st3-kanals').value;
+      const out = document.getElementById('out-st3');
+      if (!sel || !k) return out.textContent = 'Select rate & kanals';
+      const r = sel.value === 'st1' ? rateFromSt1 : rateFromSt2;
+      const perK = r / 8;
+      const annual = perK * k;
+      const monthly = annual / 12;
+      out.innerHTML = `Per kanal ${fmt(perK)}<br>Annual ${fmt(annual)}<br>Monthly ${fmt(monthly)}`;
+      document.getElementById('summary-st3').innerHTML = `
+        <h4>Stage 3 Summary</h4>
+        <ul>
+          <li>Used Rate: ${fmt(r)}/acre</li>
+          <li>Land: ${k} kanals</li>
+          <li>Monthly Income: ${fmt(monthly)}</li>
+        </ul>`;
+    });
+
+    // Stage 4
+    document.getElementById('btn-st4').addEventListener('click', () => {
+      const m = +document.getElementById('st4-monthly').value;
+      const k = +document.getElementById('st4-kanals').value;
+      const out = document.getElementById('out-st4');
+      if (!m || !k) return out.textContent = 'Enter monthly & kanals';
+      const annual = m * 12;
+      const perK = annual / k;
+      const perA = perK * 8;
+      out.innerHTML = `Annual ${fmt(annual)}<br>Per kanal ${fmt(perK)}<br>Per acre ${fmt(perA)}`;
+      document.getElementById('summary-st4').innerHTML = `
+        <h4>Stage 4 Summary</h4>
+        <p>To meet a target of <strong>${fmt(m)}</strong>/month using <strong>${k} kanals</strong> of land:</p>
+        <ul>
+          <li><strong>Total Annual Required:</strong> ${fmt(annual)}</li>
+          <li><strong>Required Rate per Kanal:</strong> ${fmt(perK)} per year</li>
+          <li><strong>Required Rate per Acre:</strong> ${fmt(perA)} per year</li>
+        </ul>
+        <p>This means <strong>each acre</strong> must generate <strong>${fmt(perA)}</strong> annually, which breaks down to approximately <strong>${fmt(perA/12)}</strong> per month.</p>
+      `;
+    });
+
+    // Stage 5
+    document.getElementById('btn-st5').addEventListener('click', () => {
+      const totalK = +document.getElementById('st5-total-kanals').value;
+      const desired = +document.getElementById('st5-desired').value;
+      const current = +document.getElementById('st5-current').value;
+      const rPct = +document.getElementById('st5-return').value / 100;
+      const rateA = +document.getElementById('st5-landrate-acre').value;
+      const out = document.getElementById('out-st5');
+      const sumEl = document.getElementById('summary-st5');
+      if (!totalK || !desired || current < 0 || !rPct || !rateA) {
+        out.textContent = 'Please fill all'; sumEl.innerHTML = ''; return;
+      }
+      const gap = desired - current;
+      if (gap <= 0) {
+        out.textContent = `Goal met: ${fmt(current)}/month`;
+        sumEl.innerHTML = '';
+        return;
+      }
+      const monthlyRate = rPct / 12;
+      const principal = gap / monthlyRate;
+      const acresToSell = principal / rateA;
+      const kanalsSold = acresToSell * 8;
+      const remainingKanals = totalK - kanalsSold;
+      const remainingAcres = remainingKanals / 8;
+      const contractAfterSale = current * (remainingKanals / totalK);
+      const originalAnnualRate = (current / totalK) * 8 * 12;
+      const increasedAnnualRate = originalAnnualRate * 1.07;
+      const projectedMonthlyAtNewRate = (increasedAnnualRate / 12) * remainingAcres;
+
+      out.innerHTML = 
+        `Sell ${acresToSell.toFixed(2)} acres (${kanalsSold.toFixed(2)} kanals) → Invest ${fmt(principal)}`;
+      sumEl.innerHTML = 
+        `<h4>Stage 5 Summary</h4>
+        <ul>
+          <li>Remaining Land: ${remainingAcres.toFixed(2)} acres (${remainingKanals.toFixed(2)} kanals)</li>
+          <li>Contract Income After Sale: ${fmt(contractAfterSale)}/month</li>
+          <li>New Shortfall: ${fmt(desired - contractAfterSale)}/month</li>
+          <li>Original Annual Rate: ${fmt(originalAnnualRate)}/acre/year</li>
+          <li>New Annual Rate (+7%): ${fmt(increasedAnnualRate)}/acre/year</li>
+          <li>Projected Monthly at +7%: ${fmt(projectedMonthlyAtNewRate)}/month</li>
+        </ul>`;
+    });
+
+    // Clear history stub
+    function clearHistory() { localStorage.removeItem('contractLogs'); document.getElementById('logs').innerHTML = ''; }
+  </script>
+</body>
+</html>
